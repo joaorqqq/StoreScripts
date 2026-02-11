@@ -1,42 +1,47 @@
--- [[ ScriptStore Loader - Versão Transparente ]]
+-- [[ ScriptStore Loader Oficial - v1.0.0 ]]
+-- Link: https://raw.githubusercontent.com/joaorqqq/StoreScripts/refs/heads/main/Loader.lua
 
 local scriptURL = "https://raw.githubusercontent.com/joaorqqq/StoreScripts/refs/heads/main/Main.lua"
 
--- 1. Verificação de Executor e Funções
-local function verificar()
+-- 1. Verificação e Notificação
+local function inicializar()
     local executor = (identifyexecutor and identifyexecutor()) or "Desconhecido"
     
-    -- Notificação de início
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "ScriptStore",
-        Text = "Executando via: " .. executor,
-        Duration = 3
-    })
+    -- Notificação visual para o usuário
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "ScriptStore 🛒",
+            Text = "Executando via: " .. executor,
+            Duration = 4
+        })
+    end)
 
-    -- Checa se o executor aguenta o tranco (Firebase precisa de request)
+    -- Alerta técnico no console (F9)
     if not request and not http_request and not syn.request then
-        warn("AVISO: Seu executor pode ter problemas com o sistema de Likes/Upload (falta de 'request').")
+        warn("ScriptStore: Seu executor não possui a função 'request'. Recursos de Likes e Upload podem não funcionar.")
     end
 end
 
--- 2. Carregamento Principal
+-- 2. Carregamento Direto e Seguro
 local function carregar()
+    -- Tenta baixar o conteúdo do Main.lua
     local success, content = pcall(function()
         return game:HttpGet(scriptURL)
     end)
 
-    if success then
+    if success and content then
+        -- Tenta transformar o texto baixado em um script executável
         local rodar, erro = loadstring(content)
         if rodar then
-            rodar()
+            rodar() -- Executa a Loja (Main.lua)
         else
-            warn("Erro no código principal: " .. tostring(erro))
+            warn("Erro de sintaxe no Main.lua: " .. tostring(erro))
         end
     else
-        warn("Falha ao conectar ao GitHub. Verifique o link ou sua conexão.")
+        warn("Erro de conexão: Não foi possível baixar o Main.lua do GitHub.")
     end
 end
 
-verificar()
+-- Execução
+inicializar()
 carregar()
-
